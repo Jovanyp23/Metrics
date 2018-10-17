@@ -1,9 +1,15 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+import static java.util.Arrays.asList;
 import java.util.ArrayList;
 
 
- public class Metrics implements Runnable {
+
+
+public class Metrics implements Runnable {
      @picocli.CommandLine.Option(names={"-l","--lines"})
      static ArrayList<String> lines;
      @picocli.CommandLine.Option(names={"-w","--words"})
@@ -18,13 +24,19 @@ import java.util.ArrayList;
      static ArrayList<String> help;
     @picocli.CommandLine.Parameters
     static ArrayList<String> positional;
+    @picocli.CommandLine.Option(names={"-H","--Halstead"})
+     static ArrayList<String> hal;
+
      public void run() {
-       //picocli features simply wont work without implementing runnable for whatever reason?
      }
-    public static void main(String[] args){//fiddle with header printing
+    public static void main(String[] args){
         boolean headerYes=false;
         boolean jc=false;
         int tic=0;
+        ArrayList<String> uniqOperators= new ArrayList<String>();
+        int totalOperators;
+        ArrayList<String> uniqOperands= new ArrayList<String>();
+        int totalOperands;
         String line=null;
         int charz=0;
         int count=0;
@@ -195,8 +207,10 @@ import java.util.ArrayList;
          System.out.println("-c or --Characters before a file name will print the character count of a file");
          System.out.println("-s or --sourcelines before a file name will print the sourceline count of a file");
          System.out.println("-C or --commentlines before a file name will print the commentline count of a file");
+         System.out.println("-H or --Halstead before a file name will print the Halstead metrics of a file");
 
-            }
+
+    }
 
 
    public static void headerPrint(boolean l, boolean w, boolean c, boolean s, boolean cm){//this is actually never called yet
@@ -242,5 +256,48 @@ import java.util.ArrayList;
       return positional;
      }
 
+ }
+class operatorz{
+    ArrayList<String> notOps = new ArrayList<String>(asList("a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F", "g", "G", "h", "H", "i", "I", "j", "J", "k", "K", "l", "L", "m", "M", "n", "N", "o", "O", "p", "P", "q", "Q", "r", "R", "s", "S", "t", "T", "u", "U", "v", "V", "w", "W", "x", "X", "y", "Y", "z", "Z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"));
+    ArrayList<String> retOps=new ArrayList<String>();
+    StringTokenizer st;
+
+
+    public operatorz() {
+    }
+    void setTokenizer(String s){
+        st = new StringTokenizer(s," ");
+    }
+    ArrayList<String> cycle(){
+        while(st.hasMoreTokens()){
+            String temp=st.nextToken();
+            if(notOps.contains(temp)){
+                retOps.add(temp);
+            }
+        }
+        return retOps;
+    }
+
+ }
+ class operandz{
+    ArrayList<String> keywords= new ArrayList<String>();
+    String srcline;
+    operatorz mask =new operatorz();
+    ArrayList<String> retRand=new ArrayList<String>();//(asList()   //this is where I would add all the key words, exact same method as above
+     public operandz(String s){
+         srcline=s;
+         mask.setTokenizer(s);
+     }
+
+     ArrayList<String> cycle(String s){
+         String[] words = s.split(" ");
+         mask.cycle();
+         for(int i=0; i<words.length;i++){
+             if(!keywords.contains(words[i])&&!mask.cycle().contains(words[i])){
+                 retRand.add(words[i]);
+             }
+         }
+         return retRand;
+    }
  }
 
