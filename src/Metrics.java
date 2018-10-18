@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 import static java.util.Arrays.asList;
 import java.util.ArrayList;
+import picocli.CommandLine;
 
 
 
@@ -34,9 +35,9 @@ public class Metrics implements Runnable {
         boolean jc=false;
         int tic=0;
         ArrayList<String> uniqOperators= new ArrayList<String>();
-        int totalOperators;
+        int totalOperators=0;
         ArrayList<String> uniqOperands= new ArrayList<String>();
-        int totalOperands;
+        int totalOperands=0;
         String line=null;
         int charz=0;
         int count=0;
@@ -56,6 +57,7 @@ public class Metrics implements Runnable {
         boolean multiComment=false;
         boolean wcParams=false;
         boolean wasRead=false;
+        hal abc= new hal();
         String fileName="";
         picocli.CommandLine.run(new Metrics(),System.err, args);
         ArrayList<String>allArgs=groupFiles(lines,words,characters,sourcelines,commentlines);
@@ -109,9 +111,11 @@ public class Metrics implements Runnable {
                                 if(line.lastIndexOf("//")>=2||line.lastIndexOf("/*")>=2){
                                     if(!line.equals(""))
                                     sourcetrack++;
+                                    abc.exectue(line);
                                 }
                             }else {
                                 sourcetrack++;
+                                abc.exectue(line);
                             }
                             }
 
@@ -121,6 +125,22 @@ public class Metrics implements Runnable {
                         if(!line.equals("")) {
                             count++;
                         }
+                        ArrayList<String> temp;
+                        temp=abc.getOps();
+                        for(int j=0;j<temp.size();j++){
+                            if(!uniqOperators.contains(temp.get(i))){
+                                uniqOperators.add(temp.get(i));
+                            }
+                        }
+                        temp=abc.getRands();
+                        for(int k=0;k<temp.size();k++){
+                            if(!uniqOperands.contains(temp.get(i))){
+                                uniqOperands.add(temp.get(i));
+                            }
+                        }
+                        totalOperands=totalOperands+abc.getTrands();
+                        totalOperators=totalOperators+abc.getTops();
+
                     }
                     buff.close();
                 } catch (Exception e) {
@@ -284,7 +304,9 @@ class operatorz{
     String srcline;
     operatorz mask =new operatorz();
     ArrayList<String> retRand=new ArrayList<String>();//(asList()   //this is where I would add all the key words, exact same method as above
-     public operandz(String s){
+     public operandz(){
+     }
+     void setStuff(String s){
          srcline=s;
          mask.setTokenizer(s);
      }
@@ -299,5 +321,35 @@ class operatorz{
          }
          return retRand;
     }
+ }
+ class hal{
+    ArrayList<String> ops;
+    ArrayList<String> rands;
+    int tops;
+    int trands;
+    operatorz a= new operatorz();
+    operandz b= new operandz();
+
+    public hal(){
+     }
+     void exectue(String s){
+        a.setTokenizer(s);
+        ops=a.cycle();
+        rands=b.cycle(s);
+        tops=ops.size();
+        trands=rands.size();
+     }
+     ArrayList<String> getOps(){
+        return ops;
+     }
+     ArrayList<String> getRands(){
+        return rands;
+     }
+     int getTops(){
+        return tops;
+     }
+     int getTrands(){
+        return trands;
+     }
  }
 
