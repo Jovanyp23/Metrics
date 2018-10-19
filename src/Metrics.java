@@ -1,10 +1,8 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import static java.util.Arrays.asList;
-import java.util.ArrayList;
 import picocli.CommandLine;
 
 
@@ -31,10 +29,11 @@ public class Metrics implements Runnable {
      public void run() {
      }
     public static void main(String[] args){
+         System.out.println(args[0]);
         boolean headerYes=false;
         boolean jc=false;
         int tic=0;
-        ArrayList<String> uniqOperators= new ArrayList<String>();
+        ArrayList<String> uniqOperators= new ArrayList<String>();//four main Hal metrics needed
         int totalOperators=0;
         ArrayList<String> uniqOperands= new ArrayList<String>();
         int totalOperands=0;
@@ -59,7 +58,7 @@ public class Metrics implements Runnable {
         boolean wasRead=false;
         hal abc= new hal();
         String fileName="";
-        picocli.CommandLine.run(new Metrics(),System.err, args);
+        CommandLine.run(new Metrics(),System.err, args);
         ArrayList<String>allArgs=groupFiles(lines,words,characters,sourcelines,commentlines);
         if(positional!=null){
             wcParams=true;
@@ -92,6 +91,7 @@ public class Metrics implements Runnable {
 
                     fileName = allArgs.get(tic);
                     FileReader reading = new FileReader(fileName);
+                    //System.out.println(fileName.getCanonicalPath())
                     BufferedReader buff = new BufferedReader(reading);
                     while ((line = buff.readLine()) != null) {
                         if(line.contains(".java")||line.contains(".c")||line.contains(".h")||line.contains(".cpp")||line.contains(".hpp")){
@@ -115,7 +115,7 @@ public class Metrics implements Runnable {
                                 }
                             }else {
                                 sourcetrack++;
-                                abc.exectue(line);
+                                abc.exectue(line);  //fixed previous issue
                             }
                             }
 
@@ -125,12 +125,13 @@ public class Metrics implements Runnable {
                         if(!line.equals("")) {
                             count++;
                         }
+                        //all this down here is also causing issues
                         ArrayList<String> temp;
                         temp=abc.getOps();
                         for(int j=0;j<temp.size();j++){
-                            if(!uniqOperators.contains(temp.get(i))){
-                                uniqOperators.add(temp.get(i));
-                            }
+                           if(!uniqOperators.contains(temp.get(i))){
+                              uniqOperators.add(temp.get(i));
+                           }
                         }
                         temp=abc.getRands();
                         for(int k=0;k<temp.size();k++){
@@ -143,9 +144,13 @@ public class Metrics implements Runnable {
 
                     }
                     buff.close();
-                } catch (Exception e) {
-                    System.out.println("error reading file");
                 }
+                catch(Exception FileNotFoundException){
+                    System.out.println("It aint reading it");
+                }
+                //catch (Exception e) {
+                // System.out.println("some other issue");
+               // }
                 if(sourcelines!=null||commentlines!=null){
                     headerYes=true;
                 }
@@ -288,9 +293,9 @@ class operatorz{
     void setTokenizer(String s){
         st = new StringTokenizer(s," ");
     }
-    ArrayList<String> cycle(){
-        while(st.hasMoreTokens()){
-            String temp=st.nextToken();
+    ArrayList<String> cycle(){//the issue here is that cycle is called when st has no value in it. Due to the previous declaration of a string array
+        while(st.hasMoreTokens()){//the fix would be to have a string array, with a method that fills it, and that goes through a cycle but for string arrays
+            String temp=st.nextToken();//or just change the string array
             if(notOps.contains(temp)){
                 retOps.add(temp);
             }
@@ -306,13 +311,10 @@ class operatorz{
     ArrayList<String> retRand=new ArrayList<String>();//(asList()   //this is where I would add all the key words, exact same method as above
      public operandz(){
      }
-     void setStuff(String s){
-         srcline=s;
-         mask.setTokenizer(s);
-     }
 
      ArrayList<String> cycle(String s){
          String[] words = s.split(" ");
+         mask.setTokenizer(s);
          mask.cycle();
          for(int i=0; i<words.length;i++){
              if(!keywords.contains(words[i])&&!mask.cycle().contains(words[i])){
