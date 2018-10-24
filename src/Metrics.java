@@ -21,10 +21,11 @@ public class Metrics implements Runnable {
      static ArrayList<String> commentlines;
      @picocli.CommandLine.Option(names={"-h","--help"})
      static ArrayList<String> help;
-    @picocli.CommandLine.Parameters
-    static ArrayList<String> positional;
     @picocli.CommandLine.Option(names={"-H","--Halstead"})
-     static ArrayList<String> hal;
+    static ArrayList<String> hal;
+    @picocli.CommandLine.Parameters
+     static ArrayList<String> positional;
+
 
      public void run() {
      }
@@ -59,7 +60,7 @@ public class Metrics implements Runnable {
         hal abc= new hal();
         String fileName="";
         CommandLine.run(new Metrics(),System.err, args);
-        ArrayList<String>allArgs=groupFiles(lines,words,characters,sourcelines,commentlines);
+       ArrayList<String>allArgs=groupFiles(lines,words,characters,sourcelines,commentlines,positional);
         if(positional!=null){
             wcParams=true;
         }
@@ -262,23 +263,24 @@ public class Metrics implements Runnable {
 
         }
    }
-   public static ArrayList<String> groupFiles(ArrayList<String> l,ArrayList<String> w,ArrayList<String> c,ArrayList<String> s,ArrayList<String> cm){
+   public static ArrayList<String> groupFiles(ArrayList<String> l,ArrayList<String> w,ArrayList<String> c,ArrayList<String> s,ArrayList<String> cm,ArrayList<String> positional){
+         ArrayList<String> ret = new ArrayList<String>();
          if (l!=null) {
-             positional.addAll(l);
+             ret.addAll(l);
          }
         if (w!=null) {
-           positional.addAll(w);
+           ret.addAll(w);
         }
         if (c!=null) {
-           positional.addAll(c);
+           ret.addAll(c);
         }
         if (s!=null) {
-           positional.addAll(s);
+           ret.addAll(s);
         }
         if (cm!=null) {
-           positional.addAll(cm);
+           ret.addAll(cm);
         }
-      return positional;
+      return ret;
      }
 
  }
