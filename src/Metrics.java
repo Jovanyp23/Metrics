@@ -30,7 +30,6 @@ public class Metrics implements Runnable {
      public void run() {
      }
     public static void main(String[] args){
-         System.out.println(args[0]);
         boolean headerYes=false;
         boolean jc=false;
         int tic=0;
@@ -92,7 +91,6 @@ public class Metrics implements Runnable {
 
                     fileName = allArgs.get(tic);
                     FileReader reading = new FileReader(fileName);
-                    //System.out.println(fileName.getCanonicalPath())
                     BufferedReader buff = new BufferedReader(reading);
                     while ((line = buff.readLine()) != null) {
                         if(line.contains(".java")||line.contains(".c")||line.contains(".h")||line.contains(".cpp")||line.contains(".hpp")){
@@ -126,7 +124,7 @@ public class Metrics implements Runnable {
                         if(!line.equals("")) {
                             count++;
                         }
-                        //all this down here is also causing issues
+
                         ArrayList<String> temp;
                         temp=abc.getOps();
                         for(int j=0;j<temp.size();j++){
@@ -225,6 +223,13 @@ public class Metrics implements Runnable {
         if(wasRead&&allArgs.size()>=1) {
             System.out.print("Total");
         }
+        System.out.println("");
+        System.out.println("total operators:"+totalOperators);
+        System.out.println("total operands:"+totalOperands);
+        System.out.println("uniq operands:"+uniqOperands.size());
+        System.out.println("uniq operators:"+uniqOperators.size());
+
+
     }
     public static void instructions(){
          System.out.println("-h or --help will print out these instructions ");
