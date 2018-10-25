@@ -8,7 +8,7 @@ import picocli.CommandLine;
 
 
 
-public class Metrics implements Runnable {
+public class Metrics implements Runnable, IMetrics {
      @picocli.CommandLine.Option(names={"-l","--lines"})
      static ArrayList<String> lines;
      @picocli.CommandLine.Option(names={"-w","--words"})
@@ -29,6 +29,17 @@ public class Metrics implements Runnable {
 
      public void run() {
      }
+
+    @Override
+    public boolean setPath(String path) {
+        return false;
+    }
+
+    @Override
+    public boolean isSource() {
+        return false;
+    }
+
     public static void main(String[] args){
         boolean headerYes=false;
         boolean jc=false;
@@ -37,6 +48,8 @@ public class Metrics implements Runnable {
         int totalOperators=0;
         ArrayList<String> uniqOperands= new ArrayList<String>();
         int totalOperands=0;
+
+
         String line=null;
         int charz=0;
         int count=0;
@@ -48,6 +61,9 @@ public class Metrics implements Runnable {
         int sourcetrack=0;
         int totComTrack=0;
         int totSourceTrack=0;
+
+
+        //Below are boolean values
         boolean linesbol=false;
         boolean wordsbol=false;
         boolean charbol=false;
@@ -249,8 +265,93 @@ public class Metrics implements Runnable {
 
     }
 
+    @Override
+    public int getLineCount() {
+        return 0;
+    }
 
-   public static void headerPrint(boolean l, boolean w, boolean c, boolean s, boolean cm){//this is actually never called yet
+    @Override
+    public int getWordCount() {
+        return 0;
+    }
+
+    @Override
+    public int getCharacterCount() {
+        return 0;
+    }
+
+    @Override
+    public int getSourceLineCount() {
+        return 0;
+    }
+
+    @Override
+    public int getCommentLineCount() {
+        return 0;
+    }
+
+    @Override
+    public int getHalsteadn1() {
+        return 0;
+    }
+
+    @Override
+    public int getHalsteadn2() {
+        return 0;
+    }
+
+    @Override
+    public int getHalsteadN1() {
+        return 0;
+    }
+
+    @Override
+    public int getHalsteadN2() {
+        return 0;
+    }
+
+    @Override
+    public int getHalsteadVocabulary() {
+        return 0;
+    }
+
+    @Override
+    public int getHalsteadProgramLength() {
+        return 0;
+    }
+
+    @Override
+    public int getHalsteadCalculatedProgramLenght() {
+        return 0;
+    }
+
+    @Override
+    public int getHalsteadVolume() {
+        return 0;
+    }
+
+    @Override
+    public int getHalsteadDifficulty() {
+        return 0;
+    }
+
+    @Override
+    public int getHalsteadEffort() {
+        return 0;
+    }
+
+    @Override
+    public int getHalsteadTime() {
+        return 0;
+    }
+
+    @Override
+    public int getHalsteadBugs() {
+        return 0;
+    }
+
+
+    public static void headerPrint(boolean l, boolean w, boolean c, boolean s, boolean cm){//this is actually never called yet
          if(s||cm) {
              if (l) {
                  System.out.print("Lines   ");
