@@ -128,28 +128,25 @@ public class Metrics implements Runnable {
                         ArrayList<String> temp;
                         temp=abc.getOps();
                         for(int j=0;j<temp.size();j++){
-                           if(!uniqOperators.contains(temp.get(i))){
-                              uniqOperators.add(temp.get(i));
+                           if(!uniqOperators.contains(temp.get(j))){
+                              uniqOperators.add(temp.get(j));
                            }
                         }
                         temp=abc.getRands();
                         for(int k=0;k<temp.size();k++){
-                            if(!uniqOperands.contains(temp.get(i))){
-                                uniqOperands.add(temp.get(i));
+                            if(!uniqOperands.contains(temp.get(k))){
+                                uniqOperands.add(temp.get(k));
                             }
                         }
-                        totalOperands=totalOperands+abc.getTrands();
-                        totalOperators=totalOperators+abc.getTops();
+                        totalOperands+=abc.getTrands();
+                        totalOperators+=abc.getTops();
 
                     }
                     buff.close();
                 }
                 catch(Exception FileNotFoundException){
-                    System.out.println("It aint reading it");
+                    System.out.println("Not able to read file");
                 }
-                //catch (Exception e) {
-                // System.out.println("some other issue");
-               // }
                 if(sourcelines!=null||commentlines!=null){
                     headerYes=true;
                 }
@@ -228,6 +225,15 @@ public class Metrics implements Runnable {
         System.out.println("total operands:"+totalOperands);
         System.out.println("uniq operands:"+uniqOperands.size());
         System.out.println("uniq operators:"+uniqOperators.size());
+        fundamental testingThis= new fundamental(uniqOperators,uniqOperands,totalOperators,totalOperands);
+        System.out.println("program vocabulary: "+testingThis.getProgVocab());
+        System.out.println("program length: "+testingThis.getProgLength());
+        System.out.println("volume: "+ testingThis.getVolume());
+        System.out.println("Difficulyt: "+testingThis.getDifficulty());
+        System.out.println("effort:"+ testingThis.getEffort());
+        System.out.println("time required to program in seconds: "+testingThis.getTimeReq());
+        System.out.println("delivered bugs: "+testingThis.getBugs());
+
 
 
     }
@@ -297,13 +303,11 @@ class operatorz{
 
     public operatorz() {
     }
-    void setTokenizer(String s){
-        st = new StringTokenizer(s," ");
-    }
-    ArrayList<String> cycle(){//the issue here is that cycle is called when st has no value in it. Due to the previous declaration of a string array
+    ArrayList<String> cycle(String s){//the issue here is that cycle is called when st has no value in it. Due to the previous declaration of a string array
+        st= new StringTokenizer(s,"");
         while(st.hasMoreTokens()){//the fix would be to have a string array, with a method that fills it, and that goes through a cycle but for string arrays
             String temp=st.nextToken();//or just change the string array
-            if(notOps.contains(temp)){
+            if(!notOps.contains(temp)){
                 retOps.add(temp);
             }
         }
@@ -313,18 +317,17 @@ class operatorz{
  }
  class operandz{
     ArrayList<String> keywords= new ArrayList<String>();
-    String srcline;
     operatorz mask =new operatorz();
-    ArrayList<String> retRand=new ArrayList<String>();//(asList()   //this is where I would add all the key words, exact same method as above
-     public operandz(){
+    ArrayList<String> retRand=new ArrayList<String>(asList("-","+",".","(",")","int","String","if","and","for"));   //this is where I would add all the key words, exact same method as above
+     public operandz()
+     {
      }
 
      ArrayList<String> cycle(String s){
-         String[] words = s.split(" ");
-         mask.setTokenizer(s);
-         mask.cycle();
+         String[] words = s.split("\\W+");
+         mask.cycle(s);
          for(int i=0; i<words.length;i++){
-             if(!keywords.contains(words[i])&&!mask.cycle().contains(words[i])){
+             if(!keywords.contains(words[i])&&!mask.cycle(s).contains(words[i])){
                  retRand.add(words[i]);
              }
          }
@@ -342,23 +345,78 @@ class operatorz{
     public hal(){
      }
      void exectue(String s){
-        a.setTokenizer(s);
-        ops=a.cycle();
+        ops=a.cycle(s);
         rands=b.cycle(s);
         tops=ops.size();
         trands=rands.size();
      }
      ArrayList<String> getOps(){
+
         return ops;
      }
      ArrayList<String> getRands(){
+
         return rands;
      }
      int getTops(){
+
         return tops;
      }
      int getTrands(){
+
         return trands;
+     }
+ }
+ class fundamental{
+    int progVocab;
+    int progLength;
+    double calcProgLength;
+    double volume;
+    int difficulty;
+    double effort;
+    double timeReq;
+    double bugs;
+    public fundamental(ArrayList<String> a, ArrayList<String> b, int c, int d){
+        progVocab=a.size()+b.size();
+        progLength=c+d;
+        calcProgLength=a.size()*(Math.log(a.size())/Math.log(2))+b.size()*(Math.log(b.size())/Math.log(2));
+        volume=progLength*(Math.log(progVocab)/Math.log(2));
+        difficulty=(a.size()/2)*(d/b.size());
+        effort=difficulty*volume;
+        timeReq=effort/18;
+        bugs=volume/3000;
+    }
+
+     public int getProgVocab() {
+         return progVocab;
+     }
+
+     public int getProgLength() {
+         return progLength;
+     }
+
+     public double getCalcProgLength() {
+         return calcProgLength;
+     }
+
+     public double getVolume() {
+         return volume;
+     }
+
+     public int getDifficulty() {
+         return difficulty;
+     }
+
+     public double getEffort() {
+         return effort;
+     }
+
+     public double getTimeReq() {
+         return timeReq;
+     }
+
+     public double getBugs() {
+         return bugs;
      }
  }
 
