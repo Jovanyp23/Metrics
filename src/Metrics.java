@@ -39,29 +39,27 @@ public class Metrics implements Runnable, IMetrics {
     public boolean isSource() {
         return false;
     }
+    static int totchar=0;
+    static int totcount=0;
+    static int totword=0;
+    static int totComTrack=0;
+    static int totSourceTrack=0;
+    static ArrayList<String> uniqOperators= new ArrayList<String>();//four main Hal metrics needed
+    static int totalOperators=0;
+    static ArrayList<String> uniqOperands= new ArrayList<String>();
+    static int totalOperands=0;
 
     public static void main(String[] args){
         boolean headerYes=false;
         boolean jc=false;
         int tic=0;
-        ArrayList<String> uniqOperators= new ArrayList<String>();//four main Hal metrics needed
-        int totalOperators=0;
-        ArrayList<String> uniqOperands= new ArrayList<String>();
-        int totalOperands=0;
-
 
         String line=null;
         int charz=0;
         int count=0;
         int wordz=0;
-        int totchar=0;
-        int totcount=0;
-        int totword=0;
         int comtrack=0;
         int sourcetrack=0;
-        int totComTrack=0;
-        int totSourceTrack=0;
-
 
         //Below are boolean values
         boolean linesbol=false;
@@ -267,87 +265,92 @@ public class Metrics implements Runnable, IMetrics {
 
     @Override
     public int getLineCount() {
-        return 0;
+        return totcount ;
     }
 
     @Override
     public int getWordCount() {
-        return 0;
+        return totword;
     }
 
     @Override
     public int getCharacterCount() {
-        return 0;
+        return totchar;
     }
 
     @Override
     public int getSourceLineCount() {
-        return 0;
+        return totSourceTrack;
     }
 
     @Override
     public int getCommentLineCount() {
-        return 0;
+        return totComTrack;
     }
 
     @Override
     public int getHalsteadn1() {
-        return 0;
+        return uniqOperators.size();
     }
 
     @Override
     public int getHalsteadn2() {
-        return 0;
+        return uniqOperands.size();
     }
 
     @Override
     public int getHalsteadN1() {
-        return 0;
+        return totalOperators;
     }
 
     @Override
     public int getHalsteadN2() {
-        return 0;
+        return totalOperands;
     }
 
     @Override
     public int getHalsteadVocabulary() {
-        return 0;
+        return getHalsteadn1()+getHalsteadn2();
     }
 
     @Override
     public int getHalsteadProgramLength() {
-        return 0;
+        return getHalsteadN1()+getHalsteadn2();
     }
 
     @Override
     public int getHalsteadCalculatedProgramLenght() {
-        return 0;
+       int a=getHalsteadn1();
+      int  b= getHalsteadn2();
+        return (int) (a*(Math.log(a)/Math.log(2))+b*(Math.log(b)/Math.log(2)));
     }
 
     @Override
     public int getHalsteadVolume() {
-        return 0;
+        return (int) (getHalsteadProgramLength()*(Math.log(getHalsteadVocabulary())/Math.log(2)));
     }
 
     @Override
     public int getHalsteadDifficulty() {
-        return 0;
+        int a=getHalsteadn1();
+        int b=getHalsteadn2();
+        int d=getHalsteadN2();
+        return (a/2)*(d/b);
     }
 
     @Override
     public int getHalsteadEffort() {
-        return 0;
+        return getHalsteadDifficulty()*getHalsteadVolume();
     }
 
     @Override
     public int getHalsteadTime() {
-        return 0;
+        return getHalsteadEffort()/18;
     }
 
     @Override
     public int getHalsteadBugs() {
-        return 0;
+        return getHalsteadVolume()/3000;
     }
 
 
