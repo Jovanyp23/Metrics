@@ -6,216 +6,223 @@ import static java.util.Arrays.asList;
 import picocli.CommandLine;
 
 
-
-
 public class Metrics implements Runnable, IMetrics {
-     @picocli.CommandLine.Option(names={"-l","--lines"})
-     static ArrayList<String> lines;
-     @picocli.CommandLine.Option(names={"-w","--words"})
-     static ArrayList<String> words;
-     @picocli.CommandLine.Option(names={"-c","--characters"})
-     static ArrayList<String> characters;
-     @picocli.CommandLine.Option(names={"-s","--sourcelines"})
-     static ArrayList<String> sourcelines;
-     @picocli.CommandLine.Option(names={"-C","--commentlines"})
-     static ArrayList<String> commentlines;
-     @picocli.CommandLine.Option(names={"-h","--help"})
-     static ArrayList<String> help;
-    @picocli.CommandLine.Option(names={"-H","--Halstead"})
+    @picocli.CommandLine.Option(names = {"-l", "--lines"})
+    static ArrayList<String> lines;
+    @picocli.CommandLine.Option(names = {"-w", "--words"})
+    static ArrayList<String> words;
+    @picocli.CommandLine.Option(names = {"-c", "--characters"})
+    static ArrayList<String> characters;
+    @picocli.CommandLine.Option(names = {"-s", "--sourcelines"})
+    static ArrayList<String> sourcelines;
+    @picocli.CommandLine.Option(names = {"-C", "--commentlines"})
+    static ArrayList<String> commentlines;
+    @picocli.CommandLine.Option(names = {"-h", "--help"})
+    static ArrayList<String> help;
+    @picocli.CommandLine.Option(names = {"-H", "--Halstead"})
     static ArrayList<String> hal;
     @picocli.CommandLine.Parameters
-     static ArrayList<String> positional;
+    static ArrayList<String> positional;
 
 
-     public void run() {
-     }
+    public void run() {
+    }
 
     @Override
     public boolean setPath(String path) {
-        return false;
+        return readCorrect;
     }
 
     @Override
     public boolean isSource() {
-        return false;
+        return jc;
     }
-    static int totchar=0;
-    static int totcount=0;
-    static int totword=0;
-    static int totComTrack=0;
-    static int totSourceTrack=0;
-    static ArrayList<String> uniqOperators= new ArrayList<String>();//four main Hal metrics needed
-    static int totalOperators=0;
-    static ArrayList<String> uniqOperands= new ArrayList<String>();
-    static int totalOperands=0;
 
-    public static void main(String[] args){
-        boolean headerYes=false;
-        boolean jc=false;
-        int tic=0;
+    static int totchar = 0;
+    static int totcount = 0;
+    static int totword = 0;
+    static int totComTrack = 0;
+    static int totSourceTrack = 0;
+    static ArrayList<String> uniqOperators = new ArrayList<String>();//four main Hal metrics needed
+    static int totalOperators = 0;
+    static ArrayList<String> uniqOperands = new ArrayList<String>();
+    static int totalOperands = 0;
+    static boolean jc;
+    static boolean readCorrect = true;
+    static boolean wcParams = false;
+    static boolean wasRead = false;
 
-        String line=null;
-        int charz=0;
-        int count=0;
-        int wordz=0;
-        int comtrack=0;
-        int sourcetrack=0;
-
-        //Below are boolean values
-        boolean linesbol=false;
-        boolean wordsbol=false;
-        boolean charbol=false;
-        boolean srcbol=false;
-        boolean combol=false;
-        boolean multiComment=false;
-        boolean wcParams=false;
-        boolean wasRead=false;
-        hal abc= new hal();
-        String fileName="";
-        CommandLine.run(new Metrics(),System.err, args);
-       ArrayList<String>allArgs=groupFiles(lines,words,characters,sourcelines,commentlines,positional);
-        if(positional!=null){
-            wcParams=true;
+    public static void main(String[] args) {
+        boolean headerYes = false;
+        jc = false;
+        int tic = 0;
+        boolean linesbol = false;
+        boolean wordsbol = false;
+        boolean charbol = false;
+        boolean srcbol = false;
+        boolean combol = false;
+        boolean multiComment = false;
+        String fileName = "";
+        CommandLine.run(new Metrics(), System.err, args);
+        ArrayList<String> allArgs = groupFiles(lines, words, characters, sourcelines, commentlines, positional, hal);
+        if (positional != null) {
+            wcParams = true;
         }
-        if(lines!=null||wcParams){
-            linesbol=true;
+        if (lines != null || wcParams) {
+            linesbol = true;
         }
-        if(words!=null||wcParams){
-            wordsbol=true;
+        if (words != null || wcParams) {
+            wordsbol = true;
         }
-        if(characters!=null||wcParams){
-            charbol=true;
+        if (characters != null || wcParams) {
+            charbol = true;
         }
-        if(sourcelines!=null){
-            srcbol=true;
+        if (sourcelines != null) {
+            srcbol = true;
         }
-        if(commentlines!=null){
-            combol=true;
+        if (commentlines != null) {
+            combol = true;
         }
-        if (args.length==0) {
+        if (args.length == 0) {
             System.out.println("0 0 0 ");
-        }
-        else if(help!=null){
+        } else if (help != null) {
             instructions();
         }
-        headerPrint(linesbol,wordsbol,charbol,srcbol,combol);
-        if(help==null) {
-            for (int i = 0; i < allArgs.size(); i++) {
-                try {
+        bucket push = new bucket(wcParams,wasRead,allArgs);
+        headerPrint(linesbol, wordsbol, charbol, srcbol, combol);
+        if (help == null) {
+            reader(fileName,allArgs,tic,headerYes,wasRead,multiComment,wcParams);
+        }
 
-                    fileName = allArgs.get(tic);
-                    FileReader reading = new FileReader(fileName);
-                    BufferedReader buff = new BufferedReader(reading);
-                    while ((line = buff.readLine()) != null) {
-                        if(line.contains(".java")||line.contains(".c")||line.contains(".h")||line.contains(".cpp")||line.contains(".hpp")){
-                            jc=true;
-                        }
-                        if(line.contains("//")||line.contains("/*")||line.contains("*/")||multiComment){
-                            comtrack++;
-                            if(line.contains("/*")) {
-                                multiComment = true;
-                            }
-                            if(line.contains("*/")) {
-                                multiComment = false;
-                            }
-                        }
-                        if(!multiComment){
-                            if(line.contains("//")||line.contains("/*")){
-                                if(line.lastIndexOf("//")>=2||line.lastIndexOf("/*")>=2){
-                                    if(!line.equals(""))
-                                    sourcetrack++;
-                                    abc.exectue(line);
-                                }
-                            }else {
+        printer(wcParams, wasRead, allArgs);
+    }
+    static void reader(String fileName, ArrayList<String> allArgs, int tic,boolean headerYes,boolean wasRead,boolean multiComment,boolean wcParams){
+        hal abc = new hal();
+        int charz = 0;
+        int count = 0;
+        int wordz = 0;
+        int comtrack = 0;
+        int sourcetrack = 0;
+    for(int i = 0; i<allArgs.size();i++)
+    {
+        try {
+
+            fileName = allArgs.get(tic);
+            FileReader reading = new FileReader(fileName);
+            BufferedReader buff = new BufferedReader(reading);
+            String line;
+            while ((line = buff.readLine()) != null) {
+                if (line.contains(".java") || line.contains(".c") || line.contains(".h") || line.contains(".cpp") || line.contains(".hpp")) {
+                    jc = true;
+                }
+                if (line.contains("//") || line.contains("/*") || line.contains("*/") || multiComment) {
+                    comtrack++;
+                    if (line.contains("/*")) {
+                        multiComment = true;
+                    }
+                    if (line.contains("*/")) {
+                        multiComment = false;
+                    }
+                }
+                if (!multiComment) {
+                    if (line.contains("//") || line.contains("/*")) {
+                        if (line.lastIndexOf("//") >= 2 || line.lastIndexOf("/*") >= 2) {
+                            if (!line.equals(""))
                                 sourcetrack++;
-                                abc.exectue(line);  //fixed previous issue
-                            }
-                            }
-
-
-                        charz = charz + line.length();
-                        wordz = wordz + line.split("\\s+").length;
-                        if(!line.equals("")) {
-                            count++;
+                            abc.exectue(line);
                         }
+                    } else {
+                        sourcetrack++;
+                        abc.exectue(line);  //fixed previous issue
+                    }
+                }
 
-                        ArrayList<String> temp;
-                        temp=abc.getOps();
-                        for(int j=0;j<temp.size();j++){
-                           if(!uniqOperators.contains(temp.get(j))){
-                              uniqOperators.add(temp.get(j));
-                           }
-                        }
-                        temp=abc.getRands();
-                        for(int k=0;k<temp.size();k++){
-                            if(!uniqOperands.contains(temp.get(k))){
-                                uniqOperands.add(temp.get(k));
-                            }
-                        }
-                        totalOperands+=abc.getTrands();
-                        totalOperators+=abc.getTops();
 
-                    }
-                    buff.close();
+                charz = charz + line.length();
+                wordz = wordz + line.split("\\s+").length;
+                if (!line.equals("")) {
+                    count++;
                 }
-                catch(Exception FileNotFoundException){
-                    System.out.println("Not able to read file");
-                }
-                if(sourcelines!=null||commentlines!=null){
-                    headerYes=true;
-                }
-                if(positional!=null){
-                    wcParams=true;
-                }
-                if(lines!=null||wcParams) {
-                    if (count != 0) {
-                        wasRead=true;
-                        System.out.print(count + "      ");
+
+                ArrayList<String> temp;
+                temp = abc.getOps();
+                for (int j = 0; j < temp.size(); j++) {
+                    if (!uniqOperators.contains(temp.get(j))) {
+                        uniqOperators.add(temp.get(j));
                     }
                 }
-                if(words!=null||wcParams) {
-                    if (wordz != 0) {
-                        wasRead=true;
-                        System.out.print(wordz + "      ");
+                temp = abc.getRands();
+                for (int k = 0; k < temp.size(); k++) {
+                    if (!uniqOperands.contains(temp.get(k))) {
+                        uniqOperands.add(temp.get(k));
                     }
                 }
-                if(characters!=null||wcParams) {
-                    if(charz!=0) {
-                        wasRead=true;
-                        System.out.print(charz + "         ");
-                    }
-                }
-                if(sourcelines!=null) {
-                    if(sourcetrack!=0) {
-                        wasRead=true;
-                        System.out.print(sourcetrack + "             ");
-                    }
-                }
-                if(commentlines!=null) {
-                    if(comtrack!=0) {
-                        wasRead=true;
-                        System.out.print(comtrack + "        ");
-                    }
-                }
-                if(wasRead) {
-                    if(count!=0) {
-                        System.out.print(fileName);
-                    }
-                }
-                System.out.println(" ");
-                totchar = totchar + charz;
-                totcount = totcount + count;
-                totword = totword + wordz;
-                totComTrack=totComTrack+comtrack;
-                totSourceTrack=totSourceTrack+sourcetrack;
-                charz = 0;
-                count = 0;
-                wordz = 0;
-                sourcetrack=0;
-                comtrack=0;
-                tic++;
+                totalOperands += abc.getTrands();
+                totalOperators += abc.getTops();
+
+            }
+            buff.close();
+        } catch (Exception FileNotFoundException) {
+            readCorrect = false;
+            System.out.println("Not able to read file");
+        }
+        if (sourcelines != null || commentlines != null) {
+            headerYes = true;
+        }
+        if (positional != null) {
+            wcParams = true;
+        }
+        if (lines != null || wcParams) {
+            if (count != 0) {
+                wasRead = true;
+                System.out.print(count + "      ");
             }
         }
+        if (words != null || wcParams) {
+            if (wordz != 0) {
+                wasRead = true;
+                System.out.print(wordz + "      ");
+            }
+        }
+        if (characters != null || wcParams) {
+            if (charz != 0) {
+                wasRead = true;
+                System.out.print(charz + "         ");
+            }
+        }
+        if (sourcelines != null) {
+            if (sourcetrack != 0) {
+                wasRead = true;
+                System.out.print(sourcetrack + "             ");
+            }
+        }
+        if (commentlines != null) {
+            if (comtrack != 0) {
+                wasRead = true;
+                System.out.print(comtrack + "        ");
+            }
+        }
+        if (wasRead) {
+            if (count != 0) {
+                System.out.print(fileName);
+            }
+        }
+        System.out.println(" ");
+        totchar = totchar + charz;
+        totcount = totcount + count;
+        totword = totword + wordz;
+        totComTrack = totComTrack + comtrack;
+        totSourceTrack = totSourceTrack + sourcetrack;
+        charz = 0;
+        count = 0;
+        wordz = 0;
+        sourcetrack = 0;
+        comtrack = 0;
+        tic++;
+    }
+
+}
+    static void printer(boolean wcParams, boolean wasRead,ArrayList<String>allArgs){
         if(lines!=null||wcParams) {
             System.out.print(totcount + "      ");
         }
@@ -237,18 +244,16 @@ public class Metrics implements Runnable, IMetrics {
         System.out.println("");
         System.out.println("total operators:"+totalOperators);
         System.out.println("total operands:"+totalOperands);
-        System.out.println("uniq operands:"+uniqOperands.size());
-        System.out.println("uniq operators:"+uniqOperators.size());
+        System.out.println("unique operands:"+uniqOperands.size());
+        System.out.println("unique operators:"+uniqOperators.size());
         fundamental testingThis= new fundamental(uniqOperators,uniqOperands,totalOperators,totalOperands);
         System.out.println("program vocabulary: "+testingThis.getProgVocab());
         System.out.println("program length: "+testingThis.getProgLength());
         System.out.println("volume: "+ testingThis.getVolume());
-        System.out.println("Difficulyt: "+testingThis.getDifficulty());
+        System.out.println("Difficulty: "+testingThis.getDifficulty());
         System.out.println("effort:"+ testingThis.getEffort());
         System.out.println("time required to program in seconds: "+testingThis.getTimeReq());
         System.out.println("delivered bugs: "+testingThis.getBugs());
-
-
 
     }
     public static void instructions(){
@@ -378,7 +383,7 @@ public class Metrics implements Runnable, IMetrics {
 
         }
    }
-   public static ArrayList<String> groupFiles(ArrayList<String> l,ArrayList<String> w,ArrayList<String> c,ArrayList<String> s,ArrayList<String> cm,ArrayList<String> positional){
+   public static ArrayList<String> groupFiles(ArrayList<String> l,ArrayList<String> w,ArrayList<String> c,ArrayList<String> s,ArrayList<String> cm,ArrayList<String> positional, ArrayList<String> h){
          ArrayList<String> ret = new ArrayList<String>();
          if (l!=null) {
              ret.addAll(l);
@@ -395,6 +400,9 @@ public class Metrics implements Runnable, IMetrics {
         if (cm!=null) {
            ret.addAll(cm);
         }
+       if (h!=null) {
+           ret.addAll(cm);
+       }
       return ret;
      }
 
@@ -523,4 +531,5 @@ class operatorz{
          return bugs;
      }
  }
+
 
