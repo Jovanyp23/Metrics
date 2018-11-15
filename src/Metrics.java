@@ -1,9 +1,11 @@
+import picocli.CommandLine;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+
 import static java.util.Arrays.asList;
-import picocli.CommandLine;
 
 //current metics program. Needs to be tested again to make sure previous functions still work correctly.
 //Untouched currently but needs to be modified to work with our current Metrics group project.
