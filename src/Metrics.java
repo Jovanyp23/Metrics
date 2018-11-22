@@ -91,7 +91,6 @@ public class Metrics implements Runnable, IMetrics {
         } else if (help != null) {
             instructions();
         }
-        bucket push = new bucket(wcParams,wasRead,allArgs);
         headerPrint(linesbol, wordsbol, charbol, srcbol, combol);
         if (help == null) {
             reader(fileName,allArgs,tic,headerYes,wasRead,multiComment,wcParams);
