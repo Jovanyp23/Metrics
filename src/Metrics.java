@@ -266,8 +266,6 @@ public class Metrics implements Runnable, IMetrics {
          System.out.println("-s or --sourcelines before a file name will print the sourceline count of a file");
          System.out.println("-C or --commentlines before a file name will print the commentline count of a file");
          System.out.println("-H or --Halstead before a file name will print the Halstead metrics of a file");
-
-
     }
 
     @Override
